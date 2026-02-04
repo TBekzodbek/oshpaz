@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oshpaz</title>
+</head>
+<body>
+<h1>Oshpaz - Uzbek Recipe AI</h1>
+<input id="ingredients" placeholder="e.g., carrot, onion, beef">
+<button onclick="getRecipe()">Get Recipe</button>
+<pre id="output"></pre>
+
+<script>
+async function getRecipe() {
+  const ing = document.getElementById("ingredients").value.split(",").map(i => i.trim()).filter(i => i);
+  if (!ing.length) { alert("Enter ingredients!"); return; }
+
+  const output = document.getElementById("output");
+  output.textContent = "Fetching recipe...";
+
+  try {
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ingredients: ing })
+    });
+    const data = await res.json();
+    output.textContent = JSON.stringify(data, null, 2);
+  } catch (err) {
+    output.textContent = "Error: " + err.message;
+  }
+}
+</script>
+</body>
+</html>
