@@ -1,36 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oshpaz</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oshpaz - Uzbek Recipe AI</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<h1>Oshpaz - Uzbek Recipe AI</h1>
-<input id="ingredients" placeholder="e.g., carrot, onion, beef">
-<button onclick="getRecipe()">Get Recipe</button>
-<pre id="output"></pre>
+  <div class="container">
+    <h1>Oshpaz - Uzbek Recipe AI</h1>
 
-<script>
-async function getRecipe() {
-  const ing = document.getElementById("ingredients").value.split(",").map(i => i.trim()).filter(i => i);
-  if (!ing.length) { alert("Enter ingredients!"); return; }
+    <label>Enter ingredients (comma separated):</label>
+    <input type="text" id="ingredients" placeholder="e.g., potato, carrot, beef">
+    <button onclick="getRecipe()">Get Recipe</button>
 
-  const output = document.getElementById("output");
-  output.textContent = "Fetching recipe...";
+    <div id="recipe-output"></div>
+  </div>
 
-  try {
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ingredients: ing })
-    });
-    const data = await res.json();
-    output.textContent = JSON.stringify(data, null, 2);
-  } catch (err) {
-    output.textContent = "Error: " + err.message;
-  }
-}
-</script>
+  <script>
+    async function getRecipe() {
+      const ingredients = document.getElementById("ingredients").value
+        .split(",").map(i => i.trim()).filter(i => i);
+
+      if (!ingredients.length) {
+        alert("Please enter ingredients!");
+        return;
+      }
+
+      const output = document.getElementById("recipe-output");
+      output.innerHTML = "<p>Fetching recipe...</p>";
+
+      try {
+        const res = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ingredients })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+          output.innerHTML = `<p style="color:red;">${data.error}</p>`;
+          return;
+        }
+
+        output.innerHTML = `
+      <h2>${data.title}</h2>
+      <p><strong>Description:</strong> ${data.description}</p>
+      <p><strong>Time:</strong> ${data.time} | <strong>Difficulty:</strong> ${data.difficulty}</p>
+      <h3>Ingredients:</h3>
+      <ul>${data.ingredients.map(i => `<li>${i}</li>`).join("")}</ul>
+      <h3>Instructions:</h3>
+      <ol>${data.instructions.map(i => `<li>${i}</li>`).join("")}</ol>
+    `;
+      } catch (err) {
+        output.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      }
+    }
+  </script>
 </body>
+
 </html>

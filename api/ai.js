@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Please provide ingredients" });
 
     const prompt = `
-You are an expert Uzbek chef. The user has: ${ingredients.join(", ")}.
+You are an expert Uzbek chef. User has: ${ingredients.join(", ")}.
 Suggest a recipe in JSON format:
 {
   "title": "Recipe Name",
@@ -22,7 +22,7 @@ Suggest a recipe in JSON format:
   "time": "Cooking time",
   "difficulty": "Easy/Medium/Hard"
 }
-Do NOT add markdown, only JSON.
+No markdown, only JSON.
 `;
 
     const response = await fetch(
@@ -36,11 +36,10 @@ Do NOT add markdown, only JSON.
 
     const text = await response.text();
     let data;
-    try { data = JSON.parse(text); } 
+    try { data = JSON.parse(text); }
     catch { return res.status(500).json({ error: "Chef is busy", raw_response: text }); }
 
     res.status(200).json(data);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Chef is busy", details: err.message });
